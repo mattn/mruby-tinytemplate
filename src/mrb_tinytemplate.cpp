@@ -44,6 +44,7 @@ mrb_tinytemplate_init(mrb_state* mrb, mrb_value self) {
   std::stringstream ss;
   try {
     ss << '"';
+    // TODO: replace double quote to \x22
     ss << ifs.rdbuf();    
     ss << '"';
     ifs.close();
