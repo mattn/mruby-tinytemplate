@@ -41,13 +41,21 @@ mrb_tinytemplate_init(mrb_state* mrb, mrb_value self) {
   } catch (std::ifstream::failure e) {
     mrb_raise(mrb, E_RUNTIME_ERROR, e.what());
   }
-  std::stringstream ss;
+  std::string code;
   try {
-    ss << '"';
-    // TODO: replace double quote to \x22
+    std::stringstream ss;
     ss << ifs.rdbuf();    
-    ss << '"';
+	std::string tmp = ss.str();
+
+    std::string::size_type n, nb = 0;
+    while((n = tmp.find("\"", nb)) != std::string::npos) {
+      tmp.replace(n, 1, "\\x22");
+      nb = n + 4;
+    }
     ifs.close();
+	code = "\"";
+	code += tmp;
+	code += "\"";
   } catch (std::ifstream::failure e) {
     ifs.close();
     mrb_raise(mrb, E_RUNTIME_ERROR, e.what());
@@ -55,7 +63,7 @@ mrb_tinytemplate_init(mrb_state* mrb, mrb_value self) {
 
   tt = new mrb_tinytemplate;
   tt->mrb = mrb_open(); 
-  tt->tmpl = ss.str();
+  tt->tmpl = code;
 
   DATA_TYPE(self) = &mrb_tinytemplate_data_type;
   DATA_PTR(self) = tt;
